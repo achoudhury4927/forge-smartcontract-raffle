@@ -5,15 +5,35 @@ import "../node_modules/@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "../node_modules/@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "../node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol";
 
+/**
+ * @dev This error is triggered when msg.value is less than i_entrancefee
+ */
 error Raffle__NotEnoughEthEntered();
+/**
+ * @dev This error is triggered when transferring contract balance to winner fails
+ */
 error Raffle__TransferFailed();
+/**
+ * @dev This error is triggered when RaffleState ENUM is not set to OPEN
+ */
 error Raffle__NotOpen();
+/**
+ * @dev This error is triggered when performUpkeep of the Chainlink Keeper is called
+ * when checkUpkeep returns false. This error contains all the state variables which
+ * could cause checkUpkeep to return false apart from timestamp.
+ */
 error Raffle__UpkeepNotNeeded(
     uint256 currentBalance,
     uint256 numPlayers,
     uint256 raffleState
 );
 
+/**
+ * @title A sample Raffle Contract
+ * @author Adil Choudhury
+ * @notice This contract is for creating an untamperable decentralised smart contract
+ * @dev This implements Chainlink VRF v2 and Chainlink Keepers
+ */
 contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     /* Type declarations */
     enum RaffleState {
@@ -43,6 +63,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     event RequestedRaffleWinner(uint256 indexed requestId);
     event WinnerPicked(address indexed winner);
 
+    /* Functions */
     constructor(
         address vrfCoordinatorV2,
         uint256 entranceFee,
@@ -62,6 +83,10 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         i_interval = interval;
     }
 
+    /**
+     * @notice Enter the raffle if the raffle is open and entrance fee is covered
+     * @dev A RaffleEnter Event is emitted when user joins the raffle
+     */
     function enterRaffle() public payable {
         if (msg.value < i_entranceFee) {
             revert Raffle__NotEnoughEthEntered();
@@ -75,16 +100,20 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
 
     /**
      * @dev This is the function that the Chainlink Keeper nodes call
-     * They evaluate whether upkeepNeeded returns true.
      * The following should be true in order to return true:
      * 1. Our time interval should have passed
      * 2. The lottery should have at least 1 player, and have some eth
      * 3. Our subscription is funded with LINK
      * 4. The lottery should be in an "open" state
+     * @return upkeepNeeded when all checks evaluate to true
      */
     function checkUpkeep(
-        bytes memory
-    ) public override returns (bool upkeepNeeded, bytes memory) {
+        bytes memory /* checkData */
+    )
+        public
+        override
+        returns (bool upkeepNeeded, bytes memory /*performData*/)
+    {
         bool isOpen = (RaffleState.OPEN == s_raffleState);
         bool timePassed = ((block.timestamp - s_lastTimeStamp) > i_interval);
         bool hasPlayers = s_players.length > 0;
@@ -92,8 +121,14 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         upkeepNeeded = (isOpen && timePassed && hasPlayers && hasBalance);
     }
 
+    /**
+     * @dev This is the function that the Chainlink Keeper nodes call if it time for upkeep
+     * We evaluate whether checkUpkeep returns true at the beginning because anyone can
+     * call the performUpkeep function ad-hoc.
+     * It requests Chainlink VRF to return a random number
+     * A RequestedRaffleWinner event with the 'requestId' is emitted at the end
+     */
     function performUpkeep(bytes calldata) external override {
-        //bytes calldata blankCallData = new bytes(0);
         (bool upkeepNeeded, ) = checkUpkeep("");
         if (!upkeepNeeded) {
             revert Raffle__UpkeepNotNeeded(
@@ -114,8 +149,12 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         emit RequestedRaffleWinner(requestId);
     }
 
-    function requestRandomWinner() external {}
-
+    /**
+     * @dev This is the function that the Chainlink VRF nodes call when
+     * a random word is retrieved. It selects the winner from the s_players
+     * array and transfers the balance of the contract to them.
+     * This emits a WinnerPicked event with the address of the winner.
+     */
     function fulfillRandomWords(
         uint256 /*requestId,*/,
         uint256[] memory randomWords
@@ -133,8 +172,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         emit WinnerPicked(recentWinner);
     }
 
-    //Winner to be select every x minutes -> completely automate
-    //Chainlink Oracle -> Rnaomdness, autoamted exeuction using chainlink keepers
+    /* Getter functions */
 
     function getEntraceFee() public view returns (uint256) {
         return i_entranceFee;
@@ -146,5 +184,25 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
 
     function getRecentWinner() public view returns (address) {
         return s_recentWinner;
+    }
+
+    function getRaffleState() public view returns (RaffleState) {
+        return s_raffleState;
+    }
+
+    function getNumWords() public pure returns (uint256) {
+        return NUM_WORDS;
+    }
+
+    function getNumberOfPlayers() public view returns (uint256) {
+        return s_players.length;
+    }
+
+    function getLatestTimeStamp() public view returns (uint256) {
+        return s_lastTimeStamp;
+    }
+
+    function getConfirmations() public pure returns (uint256) {
+        return REQUEST_CONFIRMATIONS;
     }
 }
