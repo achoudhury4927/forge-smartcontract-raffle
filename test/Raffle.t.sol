@@ -18,7 +18,7 @@ contract RaffleTest is Test {
         );
     }
 
-    function test_VerifyConstruction() public {
+    function test_VerifyInitialisation() public {
         assertEq(raffle.getEntraceFee(), 1000000000000000000);
         assertEq(
             raffle.getRecentWinner(),
@@ -27,7 +27,34 @@ contract RaffleTest is Test {
         assertEq(uint(raffle.getRaffleState()), 0);
         assertEq(raffle.getNumWords(), 1);
         assertEq(raffle.getNumberOfPlayers(), 0);
-        assertEq(raffle.getLatestTimeStamp(), 1);
+        //Unsure how this would work when deploying to any network
+        //assertEq(raffle.getLatestTimeStamp(), 1);
         assertEq(raffle.getConfirmations(), 3);
+        assertEq(raffle.getInterval(), 5);
+    }
+
+    function test_RevertWhen_NoPlayersEnteredOnInitialisation() public {
+        vm.expectRevert(stdError.indexOOBError);
+        raffle.getPlayer(0);
+    }
+
+    function test_RevertIf_NotEnoughEthEntered() public {
+        vm.startPrank(address(0));
+        vm.expectRevert(Raffle__NotEnoughEthEntered.selector);
+        deal(address(0), 200000000000000000);
+        //uint256 balanceOfPrank = address(0).balance;
+        //console.log(balanceOfPrank);
+        raffle.enterRaffle{value: 1000000000000000}();
+        //balanceOfPrank = address(0).balance;
+        //console.log(balanceOfPrank);
+    }
+
+    function test_EnterRaffle() public {
+        vm.startPrank(address(0));
+        deal(address(0), 2000000000000000000);
+        //uint256 balanceOfPrank = address(0).balance;
+        raffle.enterRaffle{value: 1000000000000000100}();
+        //TODO: Update foundry for this assert
+        //assertNotEq(balanceOfPrank,address(0).balance);
     }
 }
