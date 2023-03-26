@@ -42,19 +42,36 @@ contract RaffleTest is Test {
         vm.startPrank(address(0));
         vm.expectRevert(Raffle__NotEnoughEthEntered.selector);
         deal(address(0), 200000000000000000);
-        //uint256 balanceOfPrank = address(0).balance;
-        //console.log(balanceOfPrank);
         raffle.enterRaffle{value: 1000000000000000}();
-        //balanceOfPrank = address(0).balance;
-        //console.log(balanceOfPrank);
     }
 
     function test_EnterRaffle() public {
         vm.startPrank(address(0));
         deal(address(0), 2000000000000000000);
-        //uint256 balanceOfPrank = address(0).balance;
-        raffle.enterRaffle{value: 1000000000000000100}();
-        //TODO: Update foundry for this assert
-        //assertNotEq(balanceOfPrank,address(0).balance);
+        raffle.enterRaffle{value: 1100000000000000000}();
+        //TODO: Latest DSTest for this assert
+        //assertNotEq(2000000000000000000,address(0).balance);
+        assertEq(address(raffle).balance, 1100000000000000000);
+        vm.stopPrank();
+    }
+
+    function test_PlayerEnteredRaffle() public {
+        vm.startPrank(address(0));
+        deal(address(0), 2000000000000000000);
+        raffle.enterRaffle{value: 1100000000000000000}();
+        assertEq(raffle.getNumberOfPlayers(), 1);
+        assertEq(raffle.getPlayer(0), address(0));
+        vm.stopPrank();
+    }
+
+    event RaffleEnter(address indexed player);
+
+    function test_RaffleEnterEvent() public {
+        vm.expectEmit(false, false, false, false);
+        emit RaffleEnter(address(0));
+        vm.startPrank(address(0));
+        deal(address(0), 2000000000000000000);
+        raffle.enterRaffle{value: 1100000000000000000}();
+        vm.stopPrank();
     }
 }
