@@ -74,4 +74,14 @@ contract RaffleTest is Test {
         raffle.enterRaffle{value: 1100000000000000000}();
         vm.stopPrank();
     }
+
+    function test_RevertIf_RaffleNotOpen() public {
+        vm.startPrank(address(0));
+        deal(address(0), 9000000000000000000);
+        raffle.enterRaffle{value: 1100000000000000000}();
+        vm.warp(1000);
+        raffle.performUpkeep("");
+        vm.expectRevert(Raffle__NotOpen.selector);
+        raffle.enterRaffle{value: 1100000000000000000}();
+    }
 }
