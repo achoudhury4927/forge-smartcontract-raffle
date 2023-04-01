@@ -1,9 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "../node_modules/@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
-import "../node_modules/@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "../node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+//The following contract imports both AutomationBaase.sol and AutomationCompatibleInterface.sol
+import "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
 
 /**
  * @dev This error is triggered when msg.value is less than i_entrancefee

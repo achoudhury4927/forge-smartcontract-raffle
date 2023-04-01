@@ -30,7 +30,6 @@ typings/
 .next
 
 # Foundry
-lib
 cache/
 out/
 broadcast/
