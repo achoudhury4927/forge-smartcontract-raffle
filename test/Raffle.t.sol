@@ -3,19 +3,25 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "src/Raffle.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import "@chainlink/contracts/src/v0.8/mocks/VRFCoordinatorV2Mock.sol";
 
 contract RaffleTest is Test {
     Raffle raffle;
+    VRFCoordinatorV2Mock vrfCoordinatorV2;
 
     function setUp() public {
+        vrfCoordinatorV2 = new VRFCoordinatorV2Mock(0, 0);
+        uint64 subId = vrfCoordinatorV2.createSubscription();
         raffle = new Raffle(
-            0x271682DEB8C4E0901D1a1550aD2e64D568E69909,
+            address(vrfCoordinatorV2),
             1000000000000000000,
             "",
-            1,
+            subId,
             20000,
             5
         );
+        vrfCoordinatorV2.addConsumer(subId, address(raffle));
     }
 
     function test_VerifyInitialisation() public {
@@ -80,6 +86,7 @@ contract RaffleTest is Test {
         deal(address(0), 9000000000000000000);
         raffle.enterRaffle{value: 1100000000000000000}();
         vm.warp(1000);
+        vm.stopPrank();
         raffle.performUpkeep("");
         vm.expectRevert(Raffle__NotOpen.selector);
         raffle.enterRaffle{value: 1100000000000000000}();
