@@ -18,8 +18,6 @@ contract WhenCheckUpkeepIsCalled is BaseSetup {
     }
 
     function test_ReturnsFalseWhenRaffleIsNotOpen() public {
-        vm.startPrank(address(0));
-        deal(address(0), 9000000000000000000);
         raffle.enterRaffle{value: 1100000000000000000}();
         vm.warp(1000);
         vm.stopPrank();
@@ -30,8 +28,6 @@ contract WhenCheckUpkeepIsCalled is BaseSetup {
     }
 
     function test_ReturnsFalseWhenEnoughTimeHasNotPassed() public {
-        vm.startPrank(address(0));
-        deal(address(0), 9000000000000000000);
         raffle.enterRaffle{value: 1100000000000000000}();
         vm.stopPrank();
         (bool upkeepNeeded, ) = raffle.checkUpkeep("");
@@ -40,8 +36,6 @@ contract WhenCheckUpkeepIsCalled is BaseSetup {
     }
 
     function test_ReturnsTrueWhenTimeHasPassedAndThereIsEthAndPlayers() public {
-        vm.startPrank(address(0));
-        deal(address(0), 9000000000000000000);
         raffle.enterRaffle{value: 1100000000000000000}();
         vm.stopPrank();
         vm.warp(1000);

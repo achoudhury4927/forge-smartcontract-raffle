@@ -147,6 +147,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
             i_callbackGasLimit,
             NUM_WORDS
         );
+        //Redundant as VRFCoordinator also emits an event with RequestId
         emit RequestedRaffleWinner(requestId);
     }
 

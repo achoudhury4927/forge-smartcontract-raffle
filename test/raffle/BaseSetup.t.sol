@@ -22,5 +22,7 @@ contract BaseSetup is Test {
             5
         );
         vrfCoordinatorV2.addConsumer(subId, address(raffle));
+        vm.startPrank(address(0));
+        deal(address(0), 9000000000000000000);
     }
 }
