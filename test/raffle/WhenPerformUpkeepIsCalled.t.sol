@@ -42,18 +42,25 @@ contract WhenPerformUpkeepIsCalled is BaseSetup {
         raffle.performUpkeep("");
     }
 
-    event RequestedRaffleWinner(uint256 indexed requestId);
+    function test_UpdatesRaffleState() public {
+        raffle.enterRaffle{value: 1100000000000000000}();
+        vm.stopPrank();
+        vm.warp(1000);
+        raffle.performUpkeep("");
+        assertEq(1, uint256(raffle.getRaffleState()));
+    }
 
     //This event and event test is redundant as Chainlink VRF emits an event with requestId too
     //Refer to test_VRFCoordinatorEmitsEventWithRequestId() to verify that event
-    function test_UpdatesRaffleStateAndEmitsEventWithRequestId() public {
+    event RequestedRaffleWinner(uint256 indexed requestId);
+
+    function test_RequestedRaffleWinnerEvent() public {
         raffle.enterRaffle{value: 1100000000000000000}();
         vm.stopPrank();
         vm.warp(1000);
         vm.expectEmit(false, false, false, false);
         emit RequestedRaffleWinner(1);
         raffle.performUpkeep("");
-        assertEq(1, uint256(raffle.getRaffleState()));
     }
 
     //Event from VRFCoordinatorV2Mock.sol, see BaseSetup for import

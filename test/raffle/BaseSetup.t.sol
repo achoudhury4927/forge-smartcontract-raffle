@@ -25,4 +25,17 @@ contract BaseSetup is Test {
         vm.startPrank(address(0));
         deal(address(0), 9000000000000000000);
     }
+
+    //TODO: Move to a helper contract
+    function helperEnterMultipleAddress() public {
+        vm.prank(address(1));
+        deal(address(1), 9000000000000000000);
+        raffle.enterRaffle{value: 1100000000000000000}();
+        vm.prank(address(2));
+        deal(address(2), 9000000000000000000);
+        raffle.enterRaffle{value: 1100000000000000000}();
+        vm.prank(address(3));
+        deal(address(3), 9000000000000000000);
+        raffle.enterRaffle{value: 1100000000000000000}();
+    }
 }
