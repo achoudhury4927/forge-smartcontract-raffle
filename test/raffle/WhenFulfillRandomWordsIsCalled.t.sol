@@ -12,8 +12,6 @@ contract WhenFulfillRandomWordsIsCalled is BaseSetup {
         vm.stopPrank();
     }
 
-    //In Raffle.sol fulfillRandomWords is an internal so cannot be called like this
-    //raffle.fulfillRandomWords(0, [0]);
     function test_RevertIf_NotCalledAfterPerformUpkeep() public {
         vm.expectRevert(bytes("nonexistent request"));
         vrfCoordinatorV2.fulfillRandomWords(0, address(raffle));
@@ -60,5 +58,48 @@ contract WhenFulfillRandomWordsIsCalled is BaseSetup {
         vm.expectEmit(true, true, true, true);
         emit WinnerPicked(address(1));
         vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
+    }
+
+    function test_WinnerReceivesEtherBalanceOfTheRaffle() public {
+        BaseSetup.helperEnterMultipleAddress();
+        uint256 balanceBeforeWin = address(1).balance;
+        uint256 totalRaffleBalance = address(raffle).balance;
+        raffle.performUpkeep("");
+        vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
+        uint256 balanceAfterWin = address(1).balance;
+        assertEq(0, address(raffle).balance);
+        assertEq(balanceAfterWin, balanceBeforeWin + totalRaffleBalance);
+    }
+
+    function test_UpdatesRecentWinner() public {
+        BaseSetup.helperEnterMultipleAddress();
+        raffle.performUpkeep("");
+        vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
+        assertEq(raffle.getRecentWinner(), address(1));
+    }
+
+    function test_UpdatesRaffleStateToOpen() public {
+        BaseSetup.helperEnterMultipleAddress();
+        assertEq(0, uint256(raffle.getRaffleState()));
+        raffle.performUpkeep("");
+        assertEq(1, uint256(raffle.getRaffleState()));
+        vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
+        assertEq(0, uint256(raffle.getRaffleState()));
+    }
+
+    function test_ResetsPlayerArray() public {
+        BaseSetup.helperEnterMultipleAddress();
+        assertEq(raffle.getNumberOfPlayers(), 4);
+        raffle.performUpkeep("");
+        vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
+        assertEq(raffle.getNumberOfPlayers(), 0);
+    }
+
+    function test_UpdatesLastTimestamp() public {
+        BaseSetup.helperEnterMultipleAddress();
+        assertEq(raffle.getLatestTimeStamp(), 1);
+        raffle.performUpkeep("");
+        vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
+        assertEq(raffle.getLatestTimeStamp(), 1000);
     }
 }
