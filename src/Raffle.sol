@@ -23,11 +23,7 @@ error Raffle__NotOpen();
  * when checkUpkeep returns false. This error contains all the state variables which
  * could cause checkUpkeep to return false apart from timestamp.
  */
-error Raffle__UpkeepNotNeeded(
-    uint256 currentBalance,
-    uint256 numPlayers,
-    uint256 raffleState
-);
+error Raffle__UpkeepNotNeeded(uint256 currentBalance, uint256 numPlayers, uint256 raffleState);
 
 /**
  * @title A sample Raffle Contract
@@ -108,12 +104,10 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
      * 4. The lottery should be in an "open" state
      * @return upkeepNeeded when all checks evaluate to true
      */
-    function checkUpkeep(
-        bytes memory /* checkData */
-    )
+    function checkUpkeep(bytes memory /* checkData */ )
         public
         override
-        returns (bool upkeepNeeded, bytes memory /*performData*/)
+        returns (bool upkeepNeeded, bytes memory /*performData*/ )
     {
         bool isOpen = (RaffleState.OPEN == s_raffleState);
         bool timePassed = ((block.timestamp - s_lastTimeStamp) > i_interval);
@@ -130,22 +124,14 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
      * A RequestedRaffleWinner event with the 'requestId' is emitted at the end
      */
     function performUpkeep(bytes calldata) external override {
-        (bool upkeepNeeded, ) = checkUpkeep("");
+        (bool upkeepNeeded,) = checkUpkeep("");
         if (!upkeepNeeded) {
-            revert Raffle__UpkeepNotNeeded(
-                address(this).balance,
-                s_players.length,
-                uint256(s_raffleState)
-            );
+            revert Raffle__UpkeepNotNeeded(address(this).balance, s_players.length, uint256(s_raffleState));
         }
 
         s_raffleState = RaffleState.CALCULATING;
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
-            i_gasLane,
-            i_subscriptionId,
-            REQUEST_CONFIRMATIONS,
-            i_callbackGasLimit,
-            NUM_WORDS
+            i_gasLane, i_subscriptionId, REQUEST_CONFIRMATIONS, i_callbackGasLimit, NUM_WORDS
         );
         //Redundant as VRFCoordinator also emits an event with RequestId
         emit RequestedRaffleWinner(requestId);
@@ -157,17 +143,14 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
      * array and transfers the balance of the contract to them.
      * This emits a WinnerPicked event with the address of the winner.
      */
-    function fulfillRandomWords(
-        uint256 /*requestId,*/,
-        uint256[] memory randomWords
-    ) internal override {
+    function fulfillRandomWords(uint256, /*requestId,*/ uint256[] memory randomWords) internal override {
         uint256 indexOfWinner = randomWords[0] % s_players.length;
         address payable recentWinner = s_players[indexOfWinner];
         s_recentWinner = recentWinner;
         s_raffleState = RaffleState.OPEN;
         s_players = new address payable[](0);
         s_lastTimeStamp = block.timestamp;
-        (bool success, ) = recentWinner.call{value: address(this).balance}("");
+        (bool success,) = recentWinner.call{value: address(this).balance}("");
         if (!success) {
             revert Raffle__TransferFailed();
         }

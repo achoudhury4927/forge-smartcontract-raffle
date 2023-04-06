@@ -12,7 +12,7 @@ contract WhenCheckUpkeepIsCalled is BaseSetup {
 
     function test_ReturnsFalseWhenThereIsNoEth() public {
         vm.warp(1000);
-        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
+        (bool upkeepNeeded,) = raffle.checkUpkeep("");
         assertTrue(!upkeepNeeded);
         assertTrue(address(raffle).balance == 0);
     }
@@ -22,15 +22,15 @@ contract WhenCheckUpkeepIsCalled is BaseSetup {
         vm.warp(1000);
         vm.stopPrank();
         raffle.performUpkeep("");
-        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
+        (bool upkeepNeeded,) = raffle.checkUpkeep("");
         assertTrue(!upkeepNeeded);
-        assertEq(uint(raffle.getRaffleState()), 1);
+        assertEq(uint256(raffle.getRaffleState()), 1);
     }
 
     function test_ReturnsFalseWhenEnoughTimeHasNotPassed() public {
         raffle.enterRaffle{value: 1100000000000000000}();
         vm.stopPrank();
-        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
+        (bool upkeepNeeded,) = raffle.checkUpkeep("");
         assertTrue(!upkeepNeeded);
         assertTrue(raffle.getLatestTimeStamp() < raffle.getInterval());
     }
@@ -39,7 +39,7 @@ contract WhenCheckUpkeepIsCalled is BaseSetup {
         raffle.enterRaffle{value: 1100000000000000000}();
         vm.stopPrank();
         vm.warp(1000);
-        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
+        (bool upkeepNeeded,) = raffle.checkUpkeep("");
         assertTrue(upkeepNeeded);
     }
 
@@ -52,7 +52,7 @@ contract WhenCheckUpkeepIsCalled is BaseSetup {
     function test_ReturnsFalseWhenThereAreNoPlayers() public {
         vm.warp(1000);
         deal(address(raffle), 9000000000000000000);
-        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
+        (bool upkeepNeeded,) = raffle.checkUpkeep("");
         assertTrue(!upkeepNeeded);
         assertTrue(raffle.getNumberOfPlayers() == 0);
     }

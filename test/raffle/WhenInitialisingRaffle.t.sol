@@ -25,14 +25,11 @@ contract WhenInitialisingRaffle is BaseSetup {
     }
 
     function test_NoRecentWinnerOnInitialisation() public {
-        assertEq(
-            raffle.getRecentWinner(),
-            0x0000000000000000000000000000000000000000
-        );
+        assertEq(raffle.getRecentWinner(), 0x0000000000000000000000000000000000000000);
     }
 
     function test_RaffleStateIsOpenOnInitialisation() public {
-        assertEq(uint(raffle.getRaffleState()), 0);
+        assertEq(uint256(raffle.getRaffleState()), 0);
     }
 
     function test_NumWordsSetCorrectlyOnInitialisation() public {
