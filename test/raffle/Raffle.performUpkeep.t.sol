@@ -2,9 +2,9 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import "./BaseSetup.t.sol";
+import "./Raffle.BaseSetup.t.sol";
 
-contract WhenPerformUpkeepIsCalled is BaseSetup {
+contract PerformUpkeep is BaseSetup {
     function setUp() public override {
         BaseSetup.setUp();
     }
@@ -15,7 +15,7 @@ contract WhenPerformUpkeepIsCalled is BaseSetup {
         raffle.enterRaffle{value: 1100000000000000000}();
         vm.stopPrank();
         vm.warp(1000);
-        (bool upkeepNeeded,) = raffle.checkUpkeep("");
+        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
         assertTrue(upkeepNeeded);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -29,7 +29,7 @@ contract WhenPerformUpkeepIsCalled is BaseSetup {
     }
 
     function test_RevertWhenCheckUpkeepReturnsFalse() public {
-        (bool upkeepNeeded,) = raffle.checkUpkeep("");
+        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
         assertFalse(upkeepNeeded);
         vm.expectRevert(
             abi.encodeWithSelector(

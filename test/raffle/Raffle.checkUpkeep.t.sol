@@ -3,18 +3,18 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "src/Raffle.sol";
-import "./BaseSetup.t.sol";
+import "./Raffle.BaseSetup.t.sol";
 
-contract WhenCheckUpkeepIsCalled is BaseSetup {
+contract CheckUpkeep is BaseSetup {
     function setUp() public override {
         BaseSetup.setUp();
     }
 
     function test_ReturnsFalseWhenThereIsNoEth() public {
         vm.warp(1000);
-        (bool upkeepNeeded,) = raffle.checkUpkeep("");
-        assertTrue(!upkeepNeeded);
-        assertTrue(address(raffle).balance == 0);
+        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
+        assertTrue(!upkeepNeeded, "upkeep is false");
+        assertTrue(address(raffle).balance == 0, "raffle balance is 0");
     }
 
     function test_ReturnsFalseWhenRaffleIsNotOpen() public {
@@ -22,25 +22,32 @@ contract WhenCheckUpkeepIsCalled is BaseSetup {
         vm.warp(1000);
         vm.stopPrank();
         raffle.performUpkeep("");
-        (bool upkeepNeeded,) = raffle.checkUpkeep("");
-        assertTrue(!upkeepNeeded);
-        assertEq(uint256(raffle.getRaffleState()), 1);
+        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
+        assertTrue(!upkeepNeeded, "upkeep is false");
+        assertEq(
+            uint256(raffle.getRaffleState()),
+            1,
+            "RaffleState is calculating"
+        );
     }
 
     function test_ReturnsFalseWhenEnoughTimeHasNotPassed() public {
         raffle.enterRaffle{value: 1100000000000000000}();
         vm.stopPrank();
-        (bool upkeepNeeded,) = raffle.checkUpkeep("");
-        assertTrue(!upkeepNeeded);
-        assertTrue(raffle.getLatestTimeStamp() < raffle.getInterval());
+        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
+        assertTrue(!upkeepNeeded, "upkeep is false");
+        assertTrue(
+            raffle.getLatestTimeStamp() < raffle.getInterval(),
+            "latest timestamp is less than interval"
+        );
     }
 
     function test_ReturnsTrueWhenTimeHasPassedAndThereIsEthAndPlayers() public {
         raffle.enterRaffle{value: 1100000000000000000}();
         vm.stopPrank();
         vm.warp(1000);
-        (bool upkeepNeeded,) = raffle.checkUpkeep("");
-        assertTrue(upkeepNeeded);
+        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
+        assertTrue(upkeepNeeded, "upkeep is true");
     }
 
     /**
@@ -52,8 +59,8 @@ contract WhenCheckUpkeepIsCalled is BaseSetup {
     function test_ReturnsFalseWhenThereAreNoPlayers() public {
         vm.warp(1000);
         deal(address(raffle), 9000000000000000000);
-        (bool upkeepNeeded,) = raffle.checkUpkeep("");
-        assertTrue(!upkeepNeeded);
-        assertTrue(raffle.getNumberOfPlayers() == 0);
+        (bool upkeepNeeded, ) = raffle.checkUpkeep("");
+        assertTrue(!upkeepNeeded, "upkeep is false");
+        assertTrue(raffle.getNumberOfPlayers() == 0, "no players in raffle");
     }
 }

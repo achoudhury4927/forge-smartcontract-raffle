@@ -3,9 +3,9 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "src/Raffle.sol";
-import "./BaseSetup.t.sol";
+import "./Raffle.BaseSetup.t.sol";
 
-contract WhenEnteringRaffle is BaseSetup {
+contract EnterRaffle is BaseSetup {
     function setUp() public override {
         BaseSetup.setUp();
     }

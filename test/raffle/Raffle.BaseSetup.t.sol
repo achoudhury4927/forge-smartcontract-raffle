@@ -26,7 +26,6 @@ contract BaseSetup is Test {
         deal(address(0), 9000000000000000000);
     }
 
-    //TODO: Move to a helper contract
     function helperEnterMultipleAddress() public {
         vm.prank(address(1));
         deal(address(1), 9000000000000000000);

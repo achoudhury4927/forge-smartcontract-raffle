@@ -2,9 +2,9 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import "./BaseSetup.t.sol";
+import "./Raffle.BaseSetup.t.sol";
 
-contract WhenFulfillRandomWordsIsCalled is BaseSetup {
+contract FulfillRandomWords is BaseSetup {
     function setUp() public override {
         BaseSetup.setUp();
         raffle.enterRaffle{value: 1100000000000000000}();
@@ -18,7 +18,9 @@ contract WhenFulfillRandomWordsIsCalled is BaseSetup {
     }
 
     //Implmentation of test described in 15:51:50 of tutorial
-    function testFuzz_RevertIf_NotCalledAfterPerformUpkeep(uint256 requestId) public {
+    function testFuzz_RevertIf_NotCalledAfterPerformUpkeep(
+        uint256 requestId
+    ) public {
         vm.expectRevert(bytes("nonexistent request"));
         vrfCoordinatorV2.fulfillRandomWords(requestId, address(raffle));
     }
@@ -55,7 +57,7 @@ contract WhenFulfillRandomWordsIsCalled is BaseSetup {
         raffle.performUpkeep("");
         vm.expectEmit(true, true, true, true);
         emit WinnerPicked(address(1));
-        vrfCoordinatorV2.fulfillRandomWords( /* requestId */ 1, address(raffle));
+        vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
     }
 
     function test_WinnerReceivesEtherBalanceOfTheRaffle() public {
@@ -63,7 +65,7 @@ contract WhenFulfillRandomWordsIsCalled is BaseSetup {
         uint256 balanceBeforeWin = address(1).balance;
         uint256 totalRaffleBalance = address(raffle).balance;
         raffle.performUpkeep("");
-        vrfCoordinatorV2.fulfillRandomWords( /* requestId */ 1, address(raffle));
+        vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
         uint256 balanceAfterWin = address(1).balance;
         assertEq(0, address(raffle).balance);
         assertEq(balanceAfterWin, balanceBeforeWin + totalRaffleBalance);
@@ -72,7 +74,7 @@ contract WhenFulfillRandomWordsIsCalled is BaseSetup {
     function test_UpdatesRecentWinner() public {
         BaseSetup.helperEnterMultipleAddress();
         raffle.performUpkeep("");
-        vrfCoordinatorV2.fulfillRandomWords( /* requestId */ 1, address(raffle));
+        vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
         assertEq(raffle.getRecentWinner(), address(1));
     }
 
@@ -81,7 +83,7 @@ contract WhenFulfillRandomWordsIsCalled is BaseSetup {
         assertEq(0, uint256(raffle.getRaffleState()));
         raffle.performUpkeep("");
         assertEq(1, uint256(raffle.getRaffleState()));
-        vrfCoordinatorV2.fulfillRandomWords( /* requestId */ 1, address(raffle));
+        vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
         assertEq(0, uint256(raffle.getRaffleState()));
     }
 
@@ -89,7 +91,7 @@ contract WhenFulfillRandomWordsIsCalled is BaseSetup {
         BaseSetup.helperEnterMultipleAddress();
         assertEq(raffle.getNumberOfPlayers(), 4);
         raffle.performUpkeep("");
-        vrfCoordinatorV2.fulfillRandomWords( /* requestId */ 1, address(raffle));
+        vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
         assertEq(raffle.getNumberOfPlayers(), 0);
     }
 
@@ -97,7 +99,7 @@ contract WhenFulfillRandomWordsIsCalled is BaseSetup {
         BaseSetup.helperEnterMultipleAddress();
         assertEq(raffle.getLatestTimeStamp(), 1);
         raffle.performUpkeep("");
-        vrfCoordinatorV2.fulfillRandomWords( /* requestId */ 1, address(raffle));
+        vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
         assertEq(raffle.getLatestTimeStamp(), 1000);
     }
 }
