@@ -17,15 +17,26 @@ contract EnterRaffle is BaseSetup {
 
     function test_EnterRaffle() public {
         raffle.enterRaffle{value: 1100000000000000000}();
-        assertFalse(2000000000000000000 == address(0).balance);
-        assertEq(address(raffle).balance, 1100000000000000000);
+        assertFalse(
+            2000000000000000000 == address(0).balance,
+            "Balance reduced when entering raffle"
+        );
+        assertEq(
+            address(raffle).balance,
+            1100000000000000000,
+            "Balance of Raffle increased by entry amount"
+        );
         vm.stopPrank();
     }
 
     function test_PlayerEnteredRaffle() public {
         raffle.enterRaffle{value: 1100000000000000000}();
-        assertEq(raffle.getNumberOfPlayers(), 1);
-        assertEq(raffle.getPlayer(0), address(0));
+        assertEq(raffle.getNumberOfPlayers(), 1, "Player added to s_players");
+        assertEq(
+            raffle.getPlayer(0),
+            address(0),
+            "The players address is correct"
+        );
         vm.stopPrank();
     }
 

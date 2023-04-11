@@ -8,7 +8,6 @@ contract RaffleScript is Script {
     function setUp() public {}
 
     function run() public {
-        //vm.broadcast();
         vm.startBroadcast();
         new Raffle(
             0x271682DEB8C4E0901D1a1550aD2e64D568E69909,

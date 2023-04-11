@@ -53,7 +53,7 @@ contract FulfillRandomWords is BaseSetup {
 
     function test_WinnerPickedEvent() public {
         BaseSetup.helperEnterMultipleAddress();
-        assertEq(raffle.getNumberOfPlayers(), 4);
+        assertEq(raffle.getNumberOfPlayers(), 4, "all 4 player entered raffle");
         raffle.performUpkeep("");
         vm.expectEmit(true, true, true, true);
         emit WinnerPicked(address(1));
@@ -67,39 +67,67 @@ contract FulfillRandomWords is BaseSetup {
         raffle.performUpkeep("");
         vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
         uint256 balanceAfterWin = address(1).balance;
-        assertEq(0, address(raffle).balance);
-        assertEq(balanceAfterWin, balanceBeforeWin + totalRaffleBalance);
+        assertEq(
+            0,
+            address(raffle).balance,
+            "Raffle balance is 0 after paying out winnings"
+        );
+        assertEq(
+            balanceAfterWin,
+            balanceBeforeWin + totalRaffleBalance,
+            "Winners balance updated with winning amount"
+        );
     }
 
     function test_UpdatesRecentWinner() public {
         BaseSetup.helperEnterMultipleAddress();
         raffle.performUpkeep("");
         vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
-        assertEq(raffle.getRecentWinner(), address(1));
+        assertEq(
+            raffle.getRecentWinner(),
+            address(1),
+            "s_recentWinner updated with address of winner"
+        );
     }
 
     function test_UpdatesRaffleStateToOpen() public {
         BaseSetup.helperEnterMultipleAddress();
-        assertEq(0, uint256(raffle.getRaffleState()));
+        assertEq(0, uint256(raffle.getRaffleState()), "RaffleState is OPEN");
         raffle.performUpkeep("");
-        assertEq(1, uint256(raffle.getRaffleState()));
+        assertEq(
+            1,
+            uint256(raffle.getRaffleState()),
+            "RaffleState is CALCULATING"
+        );
         vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
-        assertEq(0, uint256(raffle.getRaffleState()));
+        assertEq(0, uint256(raffle.getRaffleState()), "RaffleState is OPEN");
     }
 
     function test_ResetsPlayerArray() public {
         BaseSetup.helperEnterMultipleAddress();
-        assertEq(raffle.getNumberOfPlayers(), 4);
+        assertEq(raffle.getNumberOfPlayers(), 4, "all 4 player entered raffle");
         raffle.performUpkeep("");
         vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
-        assertEq(raffle.getNumberOfPlayers(), 0);
+        assertEq(
+            raffle.getNumberOfPlayers(),
+            0,
+            "s_players cleared after raffle is reset"
+        );
     }
 
     function test_UpdatesLastTimestamp() public {
         BaseSetup.helperEnterMultipleAddress();
-        assertEq(raffle.getLatestTimeStamp(), 1);
+        assertEq(
+            raffle.getLatestTimeStamp(),
+            1,
+            "timestamp is 1 on initialisation"
+        );
         raffle.performUpkeep("");
         vrfCoordinatorV2.fulfillRandomWords(/* requestId */ 1, address(raffle));
-        assertEq(raffle.getLatestTimeStamp(), 1000);
+        assertEq(
+            raffle.getLatestTimeStamp(),
+            1000,
+            "s_lastTimeStamp is updated after raffle is reset"
+        );
     }
 }
