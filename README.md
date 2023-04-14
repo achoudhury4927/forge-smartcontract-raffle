@@ -169,7 +169,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-Your Name - [@ItsAdilC](https://twitter.com/ItsAdilC) - contact@adilc.me
+Adil Choudhury - [@ItsAdilC](https://twitter.com/ItsAdilC) - contact@adilc.me
 
 Project Link: [https://github.com/achoudhury4927/forge-smartcontract-raffle](https://github.com/achoudhury4927/forge-smartcontract-raffle)
 
